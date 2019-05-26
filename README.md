@@ -43,8 +43,8 @@ The history documents have the format:
 ```javascript
 {
     _id:  ObjectId,
-    t: Date // when history was made
-    o: "i" (insert) | "u" (update) | "r" (remove) // what happens with document
+    timeStamp: Date // when history was made
+    operation: "create" (insert) | "update" (update) | "remove" (remove) // what happens with document
     d: {  // changed document data
         _id:         ObjectId
       , title:       String
@@ -58,7 +58,7 @@ The history documents have the format:
 To improve queries perfomance in history collection you can define indexes, for example:
 
 ```javascript
-var options = {indexes: [{'t': -1, 'd._id': 1}]};
+var options = {indexes: [{'timeStamp': -1, 'd._id': 1}]};
 Post.plugin(mongooseHistory, options)
 ```
 
@@ -73,32 +73,11 @@ var options = {historyConnection: secondConn}
 Post.plugin(mongooseHistory, options)
 ```
 
-### Store metadata
-If you need to store aditionnal data, use the ```metadata``` option
-It accepts a collection of objects. The parameters ```key``` and ```value``` are required. 
-You can specify mongoose options using the parameter ```schema``` (defaults to ```{type: mongoose.Schema.Types.Mixed}```)
-```value``` can be either a String (resolved from the updated object), or a function, sync or async
-
-```javascript
-var options = {
-  metadata: [
-    {key: 'title', value: 'title'},
-    {key: 'titleFunc', value: function(original, newObject){return newObject.title}},
-    {key: 'titleAsync', value: function(original, newObject, cb){cb(null, newObject.title)}}
-  ]
-};
-PostSchema.plugin(history,options);
-module.exports = mongoose.model('Post_meta', PostSchema);
-```
-
 ### Statics
 All modules with history plugin have following methods:
 
 #### Model.historyModel()
 Get History Model of Model;
-
-#### Model.clearHistory()
-Clear all History collection;
 
 ## Development
 
@@ -110,13 +89,6 @@ Custom connection uris can be provided via environment variables for e.g. using 
 ```
 CONNECTION_URI='mongodb://username:password@localhost/mongoose-history-test' SECONDARY_CONNECTION_URI='mongodb://username:password@localhost/mongoose-history-test-second' mocha
 ```
-
-### In progress
-* Plugin rewriting.
-* update, findOneAndUpdate, findOneAndRemove support.
-
-## TODO
-* **TTL documents**
 
 ## LICENSE
 
